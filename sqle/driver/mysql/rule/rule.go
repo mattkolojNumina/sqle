@@ -4621,7 +4621,7 @@ func checkAffectedRows(input *RuleHandlerInput) error {
 	}
 
 	affectCount, err := util.GetAffectedRowNum(
-		context.TODO(), input.Node.Text(), input.Ctx.GetExecutor())
+		context.TODO(), input.Node.Text(), input.Ctx.GetExecutor(), input.Ctx.GetExecutionPlan)
 	if err != nil {
 		log.NewEntry().Errorf("rule: %v; SQL: %v; get affected row number failed: %v", input.Rule.Name, input.Node.Text(), err)
 		return nil
@@ -5176,24 +5176,7 @@ func checkSelectRows(input *RuleHandlerInput) error {
 	if _, ok := input.Node.(*ast.SelectStmt); !ok {
 		return nil
 	}
-	epRecords, err := input.Ctx.GetExecutionPlan(input.Node.Text())
-	if err != nil {
-		log.NewEntry().Errorf("get execution plan failed, sqle: %v, error: %v", input.Node.Text(), err)
-		return nil
-	}
-
-	var notUseIndex bool
-	for _, record := range epRecords {
-		if record.Type == executor.ExplainRecordAccessTypeIndex || record.Type == executor.ExplainRecordAccessTypeAll {
-			notUseIndex = true
-			break
-		}
-	}
-
-	if !notUseIndex {
-		return nil
-	}
-	affectCount, err := util.GetAffectedRowNum(context.TODO(), input.Node.Text(), input.Ctx.GetExecutor())
+	affectCount, err := util.GetAffectedRowNum(context.TODO(), input.Node.Text(), input.Ctx.GetExecutor(), input.Ctx.GetExecutionPlan)
 	if err != nil {
 		return err
 	}
