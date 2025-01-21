@@ -109,14 +109,14 @@ func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Exe
 		return 0, nil
 	}
 
-	var allUseIndex bool
+	var notUseIndex bool
 	var affetcCount int64
 	var estimatedRows int64
 
 	// 检查是否所有记录都使用了索引
 	for _, record := range epRecords {
 		if record.Type == executor.ExplainRecordAccessTypeAll {
-			allUseIndex = false
+			notUseIndex = true
 		}
 		// 统计查询过程中所有的影响行数
 		estimatedRows += record.Rows
@@ -125,7 +125,7 @@ func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Exe
 	}
 
 	// 如果有记录未使用索引，或者统计影响行数大于10W
-	if !allUseIndex || estimatedRows > 100000 {
+	if notUseIndex || estimatedRows > 100000 {
 		return affetcCount, nil
 	}
 
