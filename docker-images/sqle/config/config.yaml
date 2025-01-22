@@ -1,0 +1,54 @@
+dms:
+  id: 1
+  api:
+    addr: "0.0.0.0"
+    port: 10000
+    enable_https: false
+    cert_file_path: './etc/cert.pem'
+    key_file_path: './etc/key.pem'
+  secret_key: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  service:
+    database:
+      host: "host.docker.internal"  
+      port: 33060
+      username: "root"  
+      password: "123456"  
+      database: "dms"  
+      debug: true
+      auto_migrate: true
+    log:
+      level: DEBUG
+      path: /opt/sqle/logs
+      max_size_mb: 100
+      max_backup_number: 10
+  cloudbeaver:
+    enable_https: false
+    host: "20.20.20.3"  
+    port: 8978
+    admin_user: "cbadmin"
+    admin_password: "123456" 
+sqle:
+  id: 1
+  dms_server_address: "http://127.0.0.1:10000"
+  api:
+    addr: "127.0.0.1"
+    port: 10001
+    enable_https: false
+    cert_file_path: './etc/cert.pem'
+    key_file_path: './etc/key.pem'
+  secret_key: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  service:
+    auto_migrate_table: true
+    debug_log: false
+    log_path: '/opt/sqle/logs'
+    log_max_size_mb: 1024
+    log_max_backup_number: 2
+    plugin_path: '/opt/sqle/plugins'
+    database:
+      mysql_host: 'host.docker.internal' 
+      mysql_port: 33060
+      mysql_user: 'root'  
+      mysql_password: '123456'  
+      mysql_schema: 'sqle'
+
+ # sqle-init; DO NOT EDIT

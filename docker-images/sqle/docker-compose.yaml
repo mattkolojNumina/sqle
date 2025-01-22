@@ -14,23 +14,21 @@ services:
       - sqle_net
     ports:
       - 10000:10000
-      - 10001:10001
     environment:
-      - MYSQL_HOST=20.20.20.2
-      - MYSQL_PORT=3306
+      - MYSQL_HOST=127.0.0.1
+      - MYSQL_PORT=33060
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=mysqlpass
+      - MYSQL_PASSWORD=123456
       - MYSQL_SQLE_SCHEMA=sqle
       - MYSQL_DMS_SCHEMA=dms
-      - CB_HOST=20.20.20.3
+      - CB_HOST=127.0.0.1
       - CB_PORT=8978
       - CB_USER=cbadmin
       - CB_PASSWORD=123456
-#       sqle 3.2409.0及之前版本镜像中的start.sh不支持根据环境变量更新sqle配置文件中的cb连接信息
-#       旧版本sqle镜像使用cb需手动更新sqle配置，或者将新版本的start.sh挂载进容器
-#       https://github.com/actiontech/sqle/blob/main/docker-images/sqle/start.sh
-#    volumes:
-#      - ./start.sh:/opt/start.sh
+      - AUTO_MIGRATE_TABLE=true
+    volumes:
+      - ./config/:/opt/sqle/etc/
+      - ./start.sh:/opt/sqle/start.sh
     depends_on:
       - mysql-for-sqle
     command: bash -c "sleep 10 && /opt/start.sh"
@@ -48,12 +46,12 @@ services:
       sqle_net:
         ipv4_address: 20.20.20.2
     ports:
-      - 3306:3306
+      - 33060:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=mysqlpass
+      - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_DATABASE=sqle
-    volumes: 
-      - ./init:/docker-entrypoint-initdb.d            
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
 
   cb-for-sqle:
@@ -71,9 +69,11 @@ services:
       - "8978:8978"
     environment:
       - CB_SERVER_NAME=cb-for-sqle
-      - CB_SERVER_URL=http://localhost:8978
+      - CB_SERVER_URL=http://127.0.0.1:8978
       - CB_ADMIN_NAME=cbadmin
       - CB_ADMIN_PASSWORD=123456
+    depends_on:
+      - mysql-for-sqle
     entrypoint: ""
     command:
       - bash
