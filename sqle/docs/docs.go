@@ -12853,6 +12853,9 @@ var doc = `{
                 },
                 "rule_template_name": {
                     "type": "string"
+                },
+                "rule_version": {
+                    "type": "string"
                 }
             }
         },
@@ -12923,6 +12926,9 @@ var doc = `{
                     }
                 },
                 "rule_template_name": {
+                    "type": "string"
+                },
+                "rule_version": {
                     "type": "string"
                 }
             }
@@ -17053,6 +17059,9 @@ var doc = `{
                 },
                 "rule_template_name": {
                     "type": "string"
+                },
+                "rule_version": {
+                    "type": "string"
                 }
             }
         },
@@ -17163,6 +17172,9 @@ var doc = `{
                 },
                 "rule_template_name": {
                     "type": "string"
+                },
+                "rule_version": {
+                    "type": "string"
                 }
             }
         },
@@ -17176,6 +17188,9 @@ var doc = `{
                     "type": "string"
                 },
                 "rule_template_name": {
+                    "type": "string"
+                },
+                "rule_version": {
                     "type": "string"
                 }
             }
@@ -17193,6 +17208,9 @@ var doc = `{
                     "type": "string"
                 },
                 "rule_template_name": {
+                    "type": "string"
+                },
+                "rule_version": {
                     "type": "string"
                 }
             }

@@ -12837,6 +12837,9 @@
                 },
                 "rule_template_name": {
                     "type": "string"
+                },
+                "rule_version": {
+                    "type": "string"
                 }
             }
         },
@@ -12907,6 +12910,9 @@
                     }
                 },
                 "rule_template_name": {
+                    "type": "string"
+                },
+                "rule_version": {
                     "type": "string"
                 }
             }
@@ -17037,6 +17043,9 @@
                 },
                 "rule_template_name": {
                     "type": "string"
+                },
+                "rule_version": {
+                    "type": "string"
                 }
             }
         },
@@ -17147,6 +17156,9 @@
                 },
                 "rule_template_name": {
                     "type": "string"
+                },
+                "rule_version": {
+                    "type": "string"
                 }
             }
         },
@@ -17160,6 +17172,9 @@
                     "type": "string"
                 },
                 "rule_template_name": {
+                    "type": "string"
+                },
+                "rule_version": {
                     "type": "string"
                 }
             }
@@ -17177,6 +17192,9 @@
                     "type": "string"
                 },
                 "rule_template_name": {
+                    "type": "string"
+                },
+                "rule_version": {
                     "type": "string"
                 }
             }
