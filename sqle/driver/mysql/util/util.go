@@ -21,7 +21,7 @@ import (
 
 var ErrUnsupportedSqlType = errors.New("unsupported sql type")
 
-func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Executor, fexplainRecord func(string) ([]*executor.ExplainRecord, error)) (int64, error) {
+func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Executor, explainRecordFunc func(string) ([]*executor.ExplainRecord, error)) (int64, error) {
 	// get affetc row sql
 	node, err := ParseOneSql(originSql)
 	if err != nil {
@@ -29,7 +29,7 @@ func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Exe
 	}
 
 	var newNode ast.Node
-	var affectRowSql string
+	var affectedRowSql string
 	var cannotConvert bool
 
 	// 语法规则文档
@@ -78,7 +78,7 @@ func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Exe
 		}
 		// 移除后缀分号，避免sql语法错误
 		trimSuffix := strings.TrimRight(newSql, ";")
-		affectRowSql = fmt.Sprintf("select count(*) from (%s) as t", trimSuffix)
+		affectedRowSql = fmt.Sprintf("select count(*) from (%s) as t", trimSuffix)
 	} else {
 		sqlBuilder := new(strings.Builder)
 		err = newNode.Restore(format.NewRestoreCtx(format.DefaultRestoreFlags, sqlBuilder))
@@ -86,14 +86,14 @@ func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Exe
 			return 0, err
 		}
 
-		affectRowSql = sqlBuilder.String()
+		affectedRowSql = sqlBuilder.String()
 	}
 
 	// 验证sql语法是否正确，select 字段是否有且仅有 count(*)
 	// 避免在客户机器上执行不符合预期的sql语句
-	err = checkSql(affectRowSql)
+	err = checkSql(affectedRowSql)
 	if err != nil {
-		return 0, fmt.Errorf("check sql(%v) failed, origin sql(%v), err: %v", affectRowSql, originSql, err)
+		return 0, fmt.Errorf("check sql(%v) failed, origin sql(%v), err: %v", affectedRowSql, originSql, err)
 	}
 
 	// explain 全表扫描 (type 为 ALL): 避免执行 SELECT COUNT(1)，直接拿EXPLAIN影响行数作为结果
@@ -103,7 +103,7 @@ func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Exe
 	// 	| 1  | SIMPLE      | o         | ref   | idx_status    | idx_status | 10      | const         | 5000   | Using where |
 	// 	| 1  | SIMPLE      | c         | eq_ref | PRIMARY      | PRIMARY  | 4       | orders.customer_id | 1    |             |
 
-	epRecords, err := fexplainRecord(affectRowSql)
+	epRecords, err := explainRecordFunc(affectedRowSql)
 	if err != nil {
 		log.NewEntry().Errorf("get execution plan failed, sqle: %v, error: %v", originSql, err)
 		return 0, nil
@@ -129,7 +129,7 @@ func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Exe
 		return affetcCount, nil
 	}
 
-	_, row, err := conn.Db.QueryWithContext(ctx, affectRowSql)
+	_, row, err := conn.Db.QueryWithContext(ctx, affectedRowSql)
 	if err != nil {
 		return 0, err
 	}
@@ -137,12 +137,12 @@ func GetAffectedRowNum(ctx context.Context, originSql string, conn *executor.Exe
 	// 如果下发的 SELECT COUNT(1) 的SQL，返回的结果集为空, 则返回0
 	// 例: SELECT COUNT(1) FROM test LIMIT 10,10 结果集为空
 	if len(row) == 0 {
-		log.NewEntry().Errorf("affected row sql(%v) result row count is 0", affectRowSql)
+		log.NewEntry().Errorf("affected row sql(%v) result row count is 0", affectedRowSql)
 		return 0, nil
 	}
 
 	if len(row) < 1 {
-		return 0, fmt.Errorf("affected row sql(%v) result row count(%v) less than 1", affectRowSql, len(row))
+		return 0, fmt.Errorf("affected row sql(%v) result row count(%v) less than 1", affectedRowSql, len(row))
 	}
 
 	affectCount, err := strconv.ParseInt(row[0][0].String, 10, 64)
