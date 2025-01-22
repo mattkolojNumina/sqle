@@ -6408,10 +6408,13 @@ func TestDMLCheckSelectRows(t *testing.T) {
 	runSingleRuleInspectCase(rule, t, "", inspect4, "select * from exist_tb_1 where id in (select id from exist_tb_2)", newTestResult())
 
 	inspect5 := NewMockInspect(e)
-	handler.ExpectQuery(regexp.QuoteMeta("select * from exist_tb_3 where v2='b'")).
-		WillReturnRows(sqlmock.NewRows([]string{"type"}).AddRow(executor.ExplainRecordAccessTypeIndex))
+	handler.ExpectQuery(regexp.QuoteMeta("EXPLAIN SELECT COUNT(1) FROM `exist_tb_3` WHERE `v2`='b'")).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "select_type", "table", "partitions", "type", "possible_keys", "key", "key_len", "ref", "rows", "filtered", "Extra"}).
+			AddRow(1, "SIMPLE", "exist_tb_3", nil, "ref", "v2", "v2", 2, "const", 1000, 100.00, "Using index"))
 	handler.ExpectQuery(regexp.QuoteMeta("SELECT COUNT(1) FROM `exist_tb_3` WHERE `v2`='b'")).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT(1)"}).AddRow("100000000"))
+	handler.ExpectQuery(regexp.QuoteMeta("select * from exist_tb_3 where v2='b'")).
+		WillReturnRows(sqlmock.NewRows([]string{"type"}).AddRow(executor.ExplainRecordAccessTypeIndex))
 	runSingleRuleInspectCase(rule, t, "", inspect5, "select * from exist_tb_3 where v2='b'", newTestResult().addResult(rulepkg.DMLCheckSelectRows))
 
 	inspect6 := NewMockInspect(e)
